@@ -43,7 +43,14 @@ def luythua(A,K,tol):
         mask = (y3 != 0) & (y2 != 0)
         ratio = np.divide(y3[mask], y2[mask])
         mean_value = np.mean(ratio) if ratio.size > 0 else 0
-        lambla.append(mean_value)
+        lambla1 = np.sqrt(mean_value)
+        lambla.append(lambla1)
+        lambla.append(-lambla1)
+        v1 = y2 + lambda1*y1
+        v1 = v1/norm(v1,2)
+        v2 = y2 - lambda1*y1
+        v2 = v2/norm(v2,2)
+        v = [v1,v2]
     return lambla,v
 
 

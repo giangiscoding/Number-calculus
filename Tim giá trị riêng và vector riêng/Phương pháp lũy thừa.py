@@ -57,8 +57,7 @@ def luythua(A, K, tol):
 
     # Trường hợp 2 nghiệm phức liên hợp
     if check == 0:
-        m = K  # Sử dụng K như m trong thuật toán gốc
-        y1 = A @ x
+        y1 = matrix_power(A,2*k)@x
         y2 = A @ y1
         y3 = A @ y2
         
@@ -70,17 +69,17 @@ def luythua(A, K, tol):
 
         z = symbols('z')
         mat = Matrix([
-            [1, y2[r, 0], y2[s, 0]],
-            [z, y3[r, 0], y3[s, 0]],
-            [z**2, y1[r, 0], y1[s, 0]]
+            [1, y1[r, 0], y1[s, 0]],
+            [z, y2[r, 0], y2[s, 0]],
+            [z**2, y3[r, 0], y3[s, 0]]
         ])
         p = det(mat)
         lambda_solutions = solve(p, z)
         lambda_values = np.array([complex(sol.evalf()) for sol in lambda_solutions], dtype=np.complex128)
 
-        v1 = y3 - lambda_values[0] * y2
+        v1 = y2 - lambda_values[0] * y1
         v1 = v1 / norm(v1, 2)
-        v2 = y3 - lambda_values[1] * y2
+        v2 = y2 - lambda_values[1] * y1
         v2 = v2 / norm(v2, 2)
         v = np.column_stack((v1, v2))
         print("2 gia tri rieng phuc lien hop")
@@ -88,8 +87,7 @@ def luythua(A, K, tol):
     
     return "Không tìm thấy giá trị riêng trong giới hạn lặp"
 
-import numpy as np
-
+# Ham kiem tra song song
 def kiemtrasongsong(u, v, tol):
     u_norm = u / norm(u,2)
     v_norm = v / norm(v,2)
@@ -98,14 +96,12 @@ def kiemtrasongsong(u, v, tol):
     
     return check
 
-np.set_printoptions(precision=15, suppress=True)
-
 # The matrix from your image (converted commas to decimal points)
 A = np.array([
-    [ 0.308028,    4.29374056, -1.38633287,  0.15108192],
-    [ 4.29374056,  0.31992,     1.21184431,  1.69639799],
-    [-1.38633287,  1.21184431, -0.25076267, -0.47251727],
-    [ 0.15108192,  1.69639799, -0.47251727,  0.42281467]
+    [-2,  1,  1,  1],
+    [-7, -5, -2, -1],
+    [ 0, -1, -3, -2],
+    [-1,  0, -1,  0]
 ])
 
-print(luythua(A, 1150, 1e-10))
+print(luythua(A, 15, 1e-8))

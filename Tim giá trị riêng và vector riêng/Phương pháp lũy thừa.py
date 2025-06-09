@@ -10,16 +10,15 @@ def luythua(A, K, tol):
     tol là sai số cho phép
     """
     n = A.shape[1]
-    x = np.ones((n, 1))
+    x = np.random.rand(n, 1)
     check = 0
     lambdas = []
     v = np.zeros((n, 0))
     k = 1
     
     # Trường hợp có 1 giá trị riêng trội
-    y1 = x.copy()
     while check == 0 and k < K:
-        y1 = A @ y1
+        y1 = A @ x
         y2 = A @ y1
         k += 1
         check = kiemtrasongsong(y1, y2, tol)
@@ -27,7 +26,7 @@ def luythua(A, K, tol):
     if check == 1:
         mask = (y2 != 0) & (y1 != 0)
         ratio = np.divide(y2[mask], y1[mask])
-        mean_value = np.mean(ratio) if ratio.size > 0 else 0
+        mean_value = ratio[1]
         lambdas.append(mean_value)
         v = y1 / norm(y1, 2)
         print("1 gia tri rieng")
@@ -36,9 +35,8 @@ def luythua(A, K, tol):
     # Trường hợp có 2 giá trị riêng đối nhau
     check = 0
     k = 1
-    y1 = x.copy()
     while check == 0 and k <= K:
-        y1 = A @ y1
+        y1 = matrix_power(A, 2*k) @ x
         y2 = A @ y1
         y3 = A @ y2
         k += 1
@@ -47,12 +45,12 @@ def luythua(A, K, tol):
     if check == 1:
         mask = (y3 != 0) & (y1 != 0)
         ratio = np.divide(y3[mask], y1[mask])
-        mean_value = np.mean(ratio) if ratio.size > 0 else 0
+        mean_value = ratio[0]
         lambdas.append(np.sqrt(mean_value))
         lambdas.append(-lambdas[0])
-        v1 = y2 + lambdas[0] * y1
+        v1 = lambdas[0] * y1 + y2
         v1 = v1 / norm(v1, 2)
-        v2 = y2 - lambdas[0] * y1
+        v2 = lambdas[0] * y1 - y2
         v2 = v2 / norm(v2, 2)
         print("2 gia tri rieng doi nhau")
         return lambdas, np.column_stack((v1, v2))
@@ -60,9 +58,9 @@ def luythua(A, K, tol):
     # Trường hợp 2 nghiệm phức liên hợp
     if check == 0:
         m = K  # Sử dụng K như m trong thuật toán gốc
-        y1 = matrix_power(A, 2*m + 2) @ x
-        y2 = matrix_power(A, 2*m) @ x
-        y3 = matrix_power(A, 2*m + 1) @ x
+        y1 = A @ x
+        y2 = A @ y1
+        y3 = A @ y2
         
         # Tìm các chỉ số khác 0
         nonzero_indices = np.nonzero(y1)[0]
@@ -80,27 +78,34 @@ def luythua(A, K, tol):
         lambda_solutions = solve(p, z)
         lambda_values = np.array([complex(sol.evalf()) for sol in lambda_solutions], dtype=np.complex128)
 
-        v1 = lambda_values[0] * y1
+        v1 = y3 - lambda_values[0] * y2
         v1 = v1 / norm(v1, 2)
-        v2 = lambda_values[1] * y1
+        v2 = y3 - lambda_values[1] * y2
         v2 = v2 / norm(v2, 2)
         v = np.column_stack((v1, v2))
         print("2 gia tri rieng phuc lien hop")
         return lambda_values, v
-
+    
     return "Không tìm thấy giá trị riêng trong giới hạn lặp"
 
-def kiemtrasongsong(y1, y2, tol):
-    ratios = []
-    for a, b in zip(y1, y2):
-        if abs(b) > tol:  # Tránh chia cho 0
-            ratios.append(a / b)
-        elif abs(a) > tol:  # Nếu b ≈ 0 nhưng a ≠ 0 → Không song song
-            return False
-    return all(np.isclose(ratio, ratios[0], atol=tol) for ratio in ratios)
+import numpy as np
 
-A = np.array([[-2,  1,  1,  1],
-    [-7, -5, -2, -1],
-    [ 0, -1, -3, -2],
-    [-1,  0, -1,  0]])
-print(luythua(A, 10, 1e-20))
+def kiemtrasongsong(u, v, tol):
+    u_norm = u / norm(u,2)
+    v_norm = v / norm(v,2)
+    
+    check = (norm(u_norm - v_norm,2) <= tol) or (norm(u_norm + v_norm,2) <= tol)
+    
+    return check
+
+np.set_printoptions(precision=15, suppress=True)
+
+# The matrix from your image (converted commas to decimal points)
+A = np.array([
+    [ 0.308028,    4.29374056, -1.38633287,  0.15108192],
+    [ 4.29374056,  0.31992,     1.21184431,  1.69639799],
+    [-1.38633287,  1.21184431, -0.25076267, -0.47251727],
+    [ 0.15108192,  1.69639799, -0.47251727,  0.42281467]
+])
+
+print(luythua(A, 1150, 1e-10))

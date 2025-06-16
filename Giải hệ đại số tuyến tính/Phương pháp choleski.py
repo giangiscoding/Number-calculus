@@ -33,9 +33,6 @@ B = np.array([[7,2],
               [-12,3],
               [-12,5]])
 
-eigenvalues = np.linalg.eigvals(A)
-print("Giá trị riêng:", eigenvalues)
-
 Q = find_Q(A)
 Qt = Q.T
 Y = find_Y(Qt,B)

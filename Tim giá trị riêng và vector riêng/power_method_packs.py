@@ -82,7 +82,6 @@ def power_method(A, K, tol):
         v2 = y2 - lambda_values[1] * y1
         v2 = v2 / norm(v2, 2)
         v = np.column_stack((v1, v2))
-        print("gg")
         return lambda_values, v
     return "Không tìm thấy giá trị riêng trong giới hạn lặp"
 
